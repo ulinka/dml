@@ -20,7 +20,7 @@ class LRC:
 	def __init__(self, X, y,lam=0.0001,nor=True):
 		self.X = X
 		self.y = y	
-		(self.N,self.M)=X.shape
+		(self.N,self.M)=X.shape   #N个特征数，M个数
 		self.nor=nor
 		if (nor):
 			self.X,self.scale,self.dvi= normalize(self.X)
@@ -28,7 +28,7 @@ class LRC:
 		self.lam = lam;
 		self.label,self.y=np.unique(y,return_inverse=True)
 		self.classNum =self.label.size
-		self.theta = np.zeros((self.classNum,self.N)).reshape(self.classNum*self.N)
+		self.theta = np.zeros((self.classNum,self.N)).reshape(self.classNum*self.N)   #一列  种类数*变量个数
 		self.groundTruth=np.zeros((self.classNum,self.M))
 		self.groundTruth[self.y,np.arange(0,self.M)]=1
 		if (y.shape[0] != self.M):
@@ -37,14 +37,14 @@ class LRC:
 			
 	def LRcost(self,theta):
 		#print self.X.shape,theta.reshape(self.classNum,self.N).shape
-		theta=theta.reshape(self.classNum,self.N);
+		theta=theta.reshape(self.classNum,self.N);   #矩阵计算 先变回来
 		M=np.dot(theta,self.X)
 		#print theta.reshape(self.classNum,self.N)
 		M=M-M.max()
 		h=np.exp(M)
 		h=np.true_divide(h,np.sum(h,0))
 		#print -np.sum(groundTruth*np.log(h))/self.M
-		cost = -np.sum(self.groundTruth*np.log(h))/self.M+self.lam/2.0*np.sum(theta**2);
+		cost = -np.sum(self.groundTruth*np.log(h))/self.M+self.lam/2.0*np.sum(theta**2);     #rigde惩罚
 		grad = -np.dot(self.groundTruth-h,self.X.transpose())/self.M+self.lam*theta;
 		grad = grad.reshape(self.classNum*self.N)
 		return cost,grad
@@ -53,7 +53,7 @@ class LRC:
 		#res,f,d=sp.optimize.fmin_l_bfgs_b(self.LRcost,self.theta,disp=1)
 		x0=np.random.rand(self.classNum,self.N).reshape(self.classNum*self.N)/10
 		res=sp.optimize.minimize(self.LRcost,x0, method='L-BFGS-B',jac=True,options={'disp': disp,'maxiter': maxiter})
-		self.theta=res.x
+		self.theta=res.x   #获得参变量系数值
 		pass
 		
 	def predict(self,pred):
