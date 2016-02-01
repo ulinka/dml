@@ -41,9 +41,9 @@ class DTC:
 		else:
 			self.property=property
 			
-		for i in range(self.X.shape[1]):
-			self.feature_dict.setdefault(i)
-			self.feature_dict[i]=np.unique(X[:,i])
+		for i in range(self.X.shape[1]):    #创先字典，字典用i（x的特征名字）：所对应的数据
+			self.feature_dict.setdefault(i)     
+			self.feature_dict[i]=np.unique(X[:,i])   #创先字典，字典用i（x的特征名字）：所对应的数据的分类个数D_i
 
 		if (X.shape[0] != y.shape[0] ):
 			print "the shape of X and y is not right"
@@ -69,7 +69,7 @@ class DTC:
 			return c1*pGini(y[X[:,k]>=k_v])/D+c2*pGini(y[X[:,k]<k_v])/D
 		pass
 	def makeTree(self,X,y):
-		min=10000.0
+		min=10000.0   #只是用于选择时设置的先标准
 		m_i,m_j=0,0
 		if (np.unique(y).size<=1):
 
@@ -79,16 +79,16 @@ class DTC:
 				p=self.Gini(X,y,i,j)
 				if (p<min):
 					min=p
-					m_i,m_j=i,j
+					m_i,m_j=i,j       #选出了最小的特征i 和i对应的j   因为i可能是离散取值  2，3，5 取了3  
 		
 		
 
-		if (min==1):
+		if (min==1):     # p=1 gini系数等于1，表示归类完成，返回y[0]因为都是一个类，所以随便返回一个就ok
 			return (y[0])
-		left=[]
+		left=[]     
 		righy=[]
 		if (self.property[m_i]==0):
-			left = self.makeTree(X[X[:,m_i]==m_j],y[X[:,m_i]==m_j])
+			left = self.makeTree(X[X[:,m_i]==m_j],y[X[:,m_i]==m_j])       #这里应该可以改  然后就是递归了
 			right = self.makeTree(X[X[:,m_i]!=m_j],y[X[:,m_i]!=m_j])
 		else :
 			left = self.makeTree(X[X[:,m_i]>=m_j],y[X[:,m_i]>=m_j])
@@ -98,20 +98,20 @@ class DTC:
 		self.DT=self.makeTree(self.X,self.y)
 		print self.DT
 		
-	def pred(self,X):
+	def pred(self,X):   #预测的过程，放进去一个X,对每个进行预测
 		X=np.array(X)
 		  
 		result = np.zeros((X.shape[0],1))
 		for i in range(X.shape[0]):
 			tp=self.DT
-			while ( type(tp) is  list):
-				a,b=tp[0]
+			while ( type(tp) is  list):   #递归条件，如果tp不是list，就继续往下搜索
+				a,b=tp[0]    #[(m_i,m_j),left,right]   a=m_i ,b=m_j
 				
-				if (self.property[a]==0):
+				if (self.property[a]==0):  #离散还是连续
 					if (X[i][a]==b):
-						tp=tp[1]
+						tp=tp[1]   #left
 					else:
-						tp=tp[2]
+						tp=tp[2]    #right
 				else:
 					if (X[i][a]>=b):
 						tp=tp[1]
